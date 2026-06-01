@@ -14,3 +14,5 @@ automation.log
 automation.log
 __pycache__/
 *.pyc
+GEMINI.env
+.DS_Store
