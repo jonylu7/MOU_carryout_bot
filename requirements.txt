@@ -1,0 +1,33 @@
+# 攜出自動化流程依賴套件
+# 安裝：pip install -r requirements.txt
+# 環境變數：複製 .env.example → .env，填入個人資訊；複製 .env.gemini.example → .env.gemini，填入 Gemini API 金鑰
+
+# 環境變數載入
+python-dotenv>=1.0
+
+# Google Drive API + Google Sheets API（皆由 google-api-python-client 提供）
+google-auth>=2.0
+google-auth-oauthlib>=1.0
+google-api-python-client>=2.0
+
+# Excel 讀寫
+pandas>=2.0
+openpyxl>=3.1
+
+# Word 文件填寫
+python-docx>=1.1
+
+# 圖片處理（裁切白邊）
+Pillow>=10.0
+
+# 表格本地渲染為 PNG（xlsx on Drive 的截圖路徑，避免 Drive 副本配額問題）
+matplotlib>=3.7
+
+# HTTP 審核伺服器
+flask>=3.0
+
+# docx → PDF 轉換（需要系統安裝 Microsoft Word 或 LibreOffice）
+docx2pdf>=0.1
+
+# Gemini API（選用，無 API key 時退化為純文字整理）
+google-genai>=1.0

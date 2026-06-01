@@ -1,0 +1,16 @@
+# 個人資訊 & API 金鑰（請勿提交）
+.env
+.env.gemini
+
+# Google 服務帳戶金鑰
+*.json
+
+# 電子簽章圖片
+signature.png
+
+# 產生的文件
+*.docx
+*.pdf
+automation.log
+__pycache__/
+*.pyc
