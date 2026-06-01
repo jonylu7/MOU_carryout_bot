@@ -8,9 +8,9 @@
 # 電子簽章圖片
 signature.png
 
-# 產生的文件
-*.docx
+# 產生的文件（template/ 資料夾內的範本除外）
 *.pdf
+automation.log
 automation.log
 __pycache__/
 *.pyc

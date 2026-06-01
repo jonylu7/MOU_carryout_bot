@@ -107,28 +107,33 @@ def run(dry_run: bool = False):
             continue
 
         # ── 步驟 5：HITL 審核 ────────────────────────
-        filers     = "、".join(r.填寫人 for r in requests)
-        file_lines = "\n".join(
-            f"{r.填寫人}：{r.檔案名稱}（{r.格式內容說明[:30]}…）"
-            for r in requests
+        mof_coord_preview = next(
+            (v for k, v in config.MOU_COORDINATORS.items() if k in topic), None
         )
+        mof_body = (
+            email_sender._build_mof_body(requests, mof_coord_preview)
+            if mof_coord_preview else ""
+        )
+
         review_info = {
-            "apply_date": datetime.today().strftime("%Y/%m/%d"),
-            "carry_date": carry_date,
-            "carry_time": carry_time,
-            "topic":      topic,
-            "count":      len(requests),
-            "filers":     filers,
-            "file_list":  file_lines,
+            "apply_date":    datetime.today().strftime("%Y/%m/%d"),
+            "carry_date":    carry_date,
+            "carry_time":    carry_time,
+            "topic":         topic,
+            "count":         len(requests),
+            "filers":        "、".join(r.填寫人 for r in requests),
+            "file_list":     "\n".join(
+                f"{r.填寫人}：{r.檔案名稱}" for r in requests
+            ),
+            "mof_body":      mof_body,
+            "mof_to_name":   mof_coord_preview["name"]  if mof_coord_preview else "",
+            "mof_to_email":  mof_coord_preview["email"] if mof_coord_preview else "",
+            "mof_cc":        "、".join(config.EMAIL_MOF_CC) if config.EMAIL_MOF_CC else "",
         }
 
         review_url = hitl_server.create_review_task(docx_path, review_info)
 
-        mof_coord_preview = next(
-            (v for k, v in config.MOU_COORDINATORS.items() if k in topic), None
-        )
-
-        # 發送審核 email（含連結、Word 附件、財資中心信件預覽）
+        # 發送審核 email（內容與寄給承辦人的信一致）
         try:
             email_sender.send_review_request(
                 review_url, requests, docx_path, mof_coord=mof_coord_preview

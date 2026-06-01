@@ -167,31 +167,23 @@ def download_xlsx(file_id: str) -> bytes:
 # 讀取申請
 # ─────────────────────────────────────────────────
 
-def fetch_pending_requests(
-    days_ahead: int = config.DAYS_AHEAD_FILTER,
-) -> tuple[list[CarryOutRequest], pd.DataFrame, bytes]:
+def fetch_pending_requests() -> tuple[list[CarryOutRequest], pd.DataFrame, bytes]:
     """
-    從 Google Drive 下載 xlsx，回傳：
-      - list[CarryOutRequest]：待處理申請
-      - df：完整 DataFrame（稍後寫回用）
-      - raw_bytes：原始 xlsx bytes（備用）
+    從 Google Drive 下載 xlsx，讀取分隔列（＊＊＊已完成攜出＊＊＊）以上的所有申請。
+    回傳 (pending, df, raw_bytes)。
     """
     raw = download_xlsx(config.DRIVE_FILE_ID)
     df = pd.read_excel(
         io.BytesIO(raw),
         sheet_name=config.SHEET_NAME,
-        dtype=str,                      # 全部先讀成字串，避免日期被亂轉
-        header=SHEET_HEADER_ROW,        # 跳過前 2 列公告/說明文字
+        dtype=str,
+        header=SHEET_HEADER_ROW,
     )
-
-    # 標準化欄名：去除換行、截去括號/逗號後說明
     df.columns = [_normalize_col(c) for c in df.columns]
 
-    cutoff = date.today() + timedelta(days=days_ahead)
     pending: list[CarryOutRequest] = []
 
     for idx, row in df.iterrows():
-        # 遇到「已完成攜出」分隔列就停止，其下方皆為已完成申請
         first_cell = str(list(row)[0])
         if "已完成攜出" in first_cell:
             logger.info(f"遇到分隔列（{first_cell[:20]}），停止讀取")
@@ -217,8 +209,7 @@ def fetch_pending_requests(
             送出申請=False,
         )
 
-        carry_date = req.carry_out_date
-        if carry_date is None:
+        if req.carry_out_date is None:
             logger.warning(f"第 {idx} 列日期無法解析：「{req.預定攜出日期}」，略過")
             continue
 

@@ -71,41 +71,33 @@ def send_review_request(
         f"<li>{r.填寫人}：{r.檔案名稱}</li>" for r in requests
     ) + "</ul>"
 
-    # 財資中心信件預覽
+    # 財資中心信件（作為審核信主體）
     if mof_coord:
-        preview_text = _build_mof_body(requests, mof_coord)
-        to_name  = mof_coord["name"]
-        to_email = mof_coord["email"]
-        cc_str   = "、".join(config.EMAIL_MOF_CC) if config.EMAIL_MOF_CC else "（無）"
-        mof_preview_html = f"""
-<hr>
-<h3>📧 核准後將自動寄出以下信件</h3>
-<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; font-size:13px;">
+        mof_text   = _build_mof_body(requests, mof_coord)
+        to_name    = mof_coord["name"]
+        to_email   = mof_coord["email"]
+        cc_str     = "、".join(config.EMAIL_MOF_CC) if config.EMAIL_MOF_CC else ""
+        cc_row     = f"<tr><td><b>CC</b></td><td>{cc_str}</td></tr>" if cc_str else ""
+        mof_section = f"""
+<h2 style="color:#1a5276;">📧 核准後將寄出以下信件</h2>
+<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; font-size:13px; margin-bottom:12px;">
   <tr><td><b>To</b></td><td>{to_name}　{to_email}</td></tr>
-  <tr><td><b>CC</b></td><td>{cc_str}</td></tr>
+  {cc_row}
 </table>
-<pre style="background:#f4f4f4; padding:12px; border-radius:4px; font-size:13px; white-space:pre-wrap;">{preview_text}</pre>
+<pre style="background:#f7f9fb; border:1px solid #d0d7de; border-radius:6px;
+            padding:16px; font-size:14px; line-height:1.8; white-space:pre-wrap;">{mof_text}</pre>
+<hr style="margin:24px 0;">
 """
     else:
-        mof_preview_html = ""
+        mof_section = ""
 
     body = f"""
-<html><body style="font-family:sans-serif; color:#333;">
-<h2>【攜出申請單已產生，請審閱後送出】</h2>
-<table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;">
-  <tr><td><b>預定攜出日期</b></td><td>{carry_date}</td></tr>
-  <tr><td><b>議題範圍</b></td><td>{topic}</td></tr>
-  <tr><td><b>填寫人</b></td><td>{filers}</td></tr>
-</table>
-<h3>攜出檔案：</h3>
-{file_list_html}
-<hr>
-<p><b>📄 Word 檔位置（可直接開啟編輯）：</b><br>
-<code>{docx_path}</code></p>
-<p style="color:#c0392b;">⚠️ 請先開啟 Word 檔確認範例截圖是否完整，必要時手動補充，修改後儲存。</p>
-{mof_preview_html}
-<hr>
-<p>確認無誤後，點擊下方按鈕將自動轉為 PDF 並寄送給財資中心及填寫人：</p>
+<html><body style="font-family:sans-serif; color:#333; max-width:800px; margin:0 auto;">
+{mof_section}
+<h2 style="color:#1a5276;">📄 Word 申請單</h2>
+<p style="color:#c0392b;">⚠️ 請先開啟 Word 檔確認範例截圖是否完整，修改後儲存。</p>
+<p><code style="background:#f0f3f4; padding:6px 10px; border-radius:4px;">{docx_path}</code></p>
+<hr style="margin:24px 0;">
 <p>
   <a href="{review_url}" style="
     background:#1a5276; color:white; padding:12px 24px;
