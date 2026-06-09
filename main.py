@@ -17,7 +17,6 @@ from __future__ import annotations
 import argparse
 import logging
 import re
-import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -157,9 +156,6 @@ def run(dry_run: bool = False):
                 logger.error(f"PDF 轉換失敗：{e}，改以 docx 附件寄出")
                 pdf_path = docx_path
 
-            # 建立攜出資料夾，複製 PDF（或 docx）
-            carryout_folder = form_filler.create_carryout_folder(carry_date, topic)
-            shutil.copy2(pdf_path, carryout_folder / pdf_path.name)
 
 
             # 寄送正式攜出申請通知給財資中心承辦人（附 PDF）
